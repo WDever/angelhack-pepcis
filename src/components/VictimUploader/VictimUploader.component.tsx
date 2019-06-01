@@ -19,6 +19,15 @@ class VictimUploader extends React.Component<Props, State> {
     // do something here
   };
 
+  // autoClicke = (e: React.RefObject<HTMLInputElement>) => {
+  //   e.current;
+  // };
+
+  componentDidMount(): void {
+    let element: HTMLElement = this.refs.victimImageInput as HTMLElement;
+    element.click();
+  }
+
   render() {
     return (
       <div>
@@ -27,6 +36,7 @@ class VictimUploader extends React.Component<Props, State> {
             Take a picture
             <br />
             <input
+              ref='victimImageInput'
               type='file'
               accept='image/*;capture=camera'
               onChange={this.victimImageChanged}
