@@ -6,6 +6,7 @@ interface State {
   debugContent: string;
   selectedImageFileURL: string;
   selectedImageFile: any;
+  victimStatus: any;
 }
 
 class VictimFinder extends React.Component<Props, State> {
@@ -15,6 +16,7 @@ class VictimFinder extends React.Component<Props, State> {
       debugContent: '',
       selectedImageFileURL: '',
       selectedImageFile: null,
+      victimStatus: { shelterName: null, registeredTime: null },
     };
   }
 
@@ -47,22 +49,45 @@ class VictimFinder extends React.Component<Props, State> {
     this.setState({
       debugContent: 'Submitting ' + imageName,
     });
+    this.onResponseFromServer({ shelterName: '', registeredTime: '' });
   };
 
+  // call this when the response from server has arrived from onImageSubmit
+  onResponseFromServer(resp = { shelterName: '', registeredTime: '' }) {
+    if (resp.shelterName === null) {
+      alert(
+        `
+        The one you are looking for is currently not registered at any of our shelters.
+        We will contact you once we have an update.
+        `,
+      );
+    } else {
+      this.setState({
+        victimStatus: resp,
+      });
+    }
+  }
+
   render() {
-    const { debugContent } = this.state;
+    const { debugContent, victimStatus } = this.state;
     const { onImageSubmit, onImageChange, onImageSelectButtonClick } = this;
 
+    let victimStatusString: string = '';
+    if (victimStatus.shelterName === null) {
+      victimStatusString =
+        'Please upload a photo of the one you are looking for.';
+    } else if (victimStatus.shelterName === '') {
+      victimStatusString = 'The one you are looking for is not registered.';
+    } else {
+      victimStatusString = `The one you are looking for is registered at ${
+        victimStatus.shelterName
+      } (${victimStatus.registeredTime})`;
+    }
     return (
       <div>
-        ({debugContent})
+        ({debugContent})<h1>Finder</h1>
         <br />
-        <img
-          src={this.state.selectedImageFileURL}
-          alt=''
-          style={{ maxWidth: '100%' }}
-        />
-        <hr />
+        {victimStatusString}
         <form onSubmit={onImageSubmit}>
           <input
             ref='imageInput'
@@ -78,6 +103,11 @@ class VictimFinder extends React.Component<Props, State> {
           />
           <input type='submit' value='Submit' />
         </form>
+        <img
+          src={this.state.selectedImageFileURL}
+          alt=''
+          style={{ maxWidth: '100%' }}
+        />
       </div>
     );
   }
