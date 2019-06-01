@@ -1,4 +1,5 @@
 import * as React from 'react';
+import './style.css';
 
 interface Props {}
 
@@ -63,8 +64,8 @@ class VictimFinder extends React.Component<Props, State> {
     if (resp.shelterName === 'not registered') {
       alert(
         `
-        The one you are looking for is currently not registered at any of our shelters.
-        We will contact you once we have an update.
+        The one you are looking for is currently not registered at any of our shelters
+        We will contact you once we have an update
         `,
       );
     } else {
@@ -72,25 +73,27 @@ class VictimFinder extends React.Component<Props, State> {
   }
 
   render() {
-    const { debugContent, victimStatus } = this.state;
+    const { debugContent, selectedImageFileURL, victimStatus } = this.state;
     const { onImageSubmit, onImageChange, onImageSelectButtonClick } = this;
 
     let victimStatusString: string = '';
     if (victimStatus.shelterName === '') {
-      victimStatusString =
-        'Please upload a photo of the one you are looking for.';
+      victimStatusString = ''; // 'Please upload a photo of the one you are looking for';
     } else if (victimStatus.shelterName === 'not registered') {
-      victimStatusString = 'The one you are looking for is not registered.';
+      victimStatusString = 'The one you are looking for is not registered';
     } else {
       victimStatusString = `The one you are looking for is registered at ${
         victimStatus.shelterName
       } (${victimStatus.registeredTime})`;
     }
+
     return (
-      <div>
+      <div id='VictimFinder'>
         ({debugContent})<h1>Finder</h1>
         <br />
         {victimStatusString}
+        <br />
+        <br />
         <form onSubmit={onImageSubmit}>
           <input
             ref='imageInput'
@@ -101,16 +104,21 @@ class VictimFinder extends React.Component<Props, State> {
           />
           <input
             type='button'
-            value='Select Image'
+            value='Find with image'
             onClick={onImageSelectButtonClick}
+            className='solidWhiteButton'
           />
-          <input type='submit' value='Submit' />
+          <br />
+          <br />
+          <input
+            type='submit'
+            value='Submit'
+            className='solidWhiteButton'
+            hidden={selectedImageFileURL === ''}
+          />
         </form>
-        <img
-          src={this.state.selectedImageFileURL}
-          alt=''
-          style={{ maxWidth: '100%' }}
-        />
+        <br />
+        <img src={selectedImageFileURL} alt='' style={{ maxWidth: '100%' }} />
       </div>
     );
   }
