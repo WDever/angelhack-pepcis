@@ -4,6 +4,7 @@ interface Props {}
 
 interface State {}
 
+const VictimUploader: React.FC = ()
 class VictimUploader extends React.Component<Props, State> {
   constructor(props: any) {
     super(props);
@@ -27,12 +28,12 @@ class VictimUploader extends React.Component<Props, State> {
             Take a picture
             <br />
             <input
-              type='file'
-              accept='image/*;capture=camera'
+              type="file"
+              accept="image/*;capture=camera"
               onChange={this.victimImageChanged}
             />
           </label>
-          <input type='submit' />
+          <input type="submit" />
         </form>
       </div>
     );
