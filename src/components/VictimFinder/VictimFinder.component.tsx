@@ -16,7 +16,7 @@ class VictimFinder extends React.Component<Props, State> {
       debugContent: '',
       selectedImageFileURL: '',
       selectedImageFile: null,
-      victimStatus: { shelterName: null, registeredTime: null },
+      victimStatus: { shelterName: '', registeredTime: '' },
     };
   }
 
@@ -49,12 +49,18 @@ class VictimFinder extends React.Component<Props, State> {
     this.setState({
       debugContent: 'Submitting ' + imageName,
     });
-    this.onResponseFromServer({ shelterName: '', registeredTime: '' });
+    this.onResponseFromServer({
+      shelterName: 'not registered',
+      registeredTime: '',
+    });
   };
 
   // call this when the response from server has arrived from onImageSubmit
   onResponseFromServer(resp = { shelterName: '', registeredTime: '' }) {
-    if (resp.shelterName === null) {
+    this.setState({
+      victimStatus: resp,
+    });
+    if (resp.shelterName === 'not registered') {
       alert(
         `
         The one you are looking for is currently not registered at any of our shelters.
@@ -62,9 +68,6 @@ class VictimFinder extends React.Component<Props, State> {
         `,
       );
     } else {
-      this.setState({
-        victimStatus: resp,
-      });
     }
   }
 
@@ -73,10 +76,10 @@ class VictimFinder extends React.Component<Props, State> {
     const { onImageSubmit, onImageChange, onImageSelectButtonClick } = this;
 
     let victimStatusString: string = '';
-    if (victimStatus.shelterName === null) {
+    if (victimStatus.shelterName === '') {
       victimStatusString =
         'Please upload a photo of the one you are looking for.';
-    } else if (victimStatus.shelterName === '') {
+    } else if (victimStatus.shelterName === 'not registered') {
       victimStatusString = 'The one you are looking for is not registered.';
     } else {
       victimStatusString = `The one you are looking for is registered at ${
