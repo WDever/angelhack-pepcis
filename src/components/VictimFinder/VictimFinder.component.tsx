@@ -24,6 +24,7 @@ class VictimFinder extends React.Component<Props, State> {
 
   componentDidMount() {
     this.setState({ debugContent: 'debug log will be shown here' });
+    document.title = 'Remeet - Finder';
   }
 
   onImageChange = (e: any): void => {
@@ -105,7 +106,8 @@ class VictimFinder extends React.Component<Props, State> {
     }
     return (
       <div id='VictimFinder'>
-        ({debugContent})<h1>Finder</h1>
+        <span hidden>({debugContent})</span>
+        <h1>Finder</h1>
         <br />
         {victimStatusString}
         <br />
