@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axios from 'axios';
 import './style.css';
 
 interface Props {}
@@ -17,12 +18,13 @@ class VictimFinder extends React.Component<Props, State> {
       debugContent: '',
       selectedImageFileURL: '',
       selectedImageFile: null,
-      victimStatus: { shelterName: '', registeredTime: '' },
+      victimStatus: '', // data.status: ready failed success
     };
   }
 
   componentDidMount() {
     this.setState({ debugContent: 'debug log will be shown here' });
+    document.title = 'Remeet - Finder';
   }
 
   onImageChange = (e: any): void => {
@@ -45,51 +47,67 @@ class VictimFinder extends React.Component<Props, State> {
     e.preventDefault();
     if (this.state.selectedImageFile === null) return;
     // send the photo to the server
-    console.log(this.state.selectedImageFile);
     const imageName = this.state.selectedImageFile.name;
     this.setState({
       debugContent: 'Submitting ' + imageName,
     });
-    this.onResponseFromServer({
-      shelterName: 'not registered',
-      registeredTime: '',
-    });
-  };
 
-  // call this when the response from server has arrived from onImageSubmit
-  onResponseFromServer(resp = { shelterName: '', registeredTime: '' }) {
-    this.setState({
-      victimStatus: resp,
-    });
-    if (resp.shelterName === 'not registered') {
-      alert(
-        `
+    let formData = new FormData();
+    formData.append('contact', '0');
+    formData.append('image', this.state.selectedImageFile);
+    axios({
+      method: 'post',
+      url:
+        'https://oq2j9zaqcf.execute-api.ap-northeast-2.amazonaws.com/dev/find-request/',
+      data: formData,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+      .then(
+        function(this: VictimFinder, resp: any) {
+          console.log(resp);
+
+          this.setState({
+            victimStatus: resp.data.status,
+          });
+          if (this.state.victimStatus === 'failed') {
+            alert(
+              `
         The one you are looking for is currently not registered at any of our shelters
         We will contact you once we have an update
         `,
+            );
+          }
+        }.bind(this),
+      )
+      .catch(
+        function(this: VictimFinder, err: string) {
+          console.log('Image Upload Failed. ' + err);
+          this.setState({ debugContent: 'Image Upload Failed. ' + err });
+        }.bind(this),
       );
-    } else {
-    }
-  }
+  };
 
   render() {
     const { debugContent, selectedImageFileURL, victimStatus } = this.state;
     const { onImageSubmit, onImageChange, onImageSelectButtonClick } = this;
 
     let victimStatusString: string = '';
-    if (victimStatus.shelterName === '') {
+    if (victimStatus === '') {
       victimStatusString = ''; // 'Please upload a photo of the one you are looking for';
-    } else if (victimStatus.shelterName === 'not registered') {
+    } else if (victimStatus === 'failed') {
       victimStatusString = 'The one you are looking for is not registered';
+    } else if (victimStatus === 'ready') {
+      victimStatusString =
+        'We are checking if the one is registered. Please check back later with the contact info you have provided.';
     } else {
-      victimStatusString = `The one you are looking for is registered at ${
-        victimStatus.shelterName
-      } (${victimStatus.registeredTime})`;
+      victimStatusString = 'The one you are looking for is registered';
     }
-
     return (
       <div id='VictimFinder'>
-        ({debugContent})<h1>Finder</h1>
+        <span hidden>({debugContent})</span>
+        <h1>Finder</h1>
         <br />
         {victimStatusString}
         <br />
