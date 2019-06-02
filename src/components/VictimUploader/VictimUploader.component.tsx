@@ -2,6 +2,7 @@ import * as React from 'react';
 import styled from 'styled-components';
 import Webcam from 'react-webcam';
 import DefaultSrc from 'lib/png/default.png';
+import { VictimUploadParams } from 'store';
 
 const { useState } = React;
 
@@ -38,7 +39,7 @@ const ButtonBar = styled.div`
   margin-top: -0.3rem;
 `;
 
-const CaptureOutBtn = styled.button`
+const CaptureOutBtn = styled.div`
   width: 3.75rem;
   height: 3.75rem;
   background-color: transparent;
@@ -47,15 +48,17 @@ const CaptureOutBtn = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 `;
 
-const CaptureInBtn = styled.button`
+const CaptureInBtn = styled.div`
   width: 2.875rem;
   height: 2.875rem;
   background-color: #ffffff;
   border-radius: 50%;
   border: none;
   outline: none;
+  cursor: pointer;
 `;
 
 const Img = styled.img`
@@ -68,11 +71,14 @@ const Empty = styled.div`
   height: 3.125rem;
 `;
 
-interface Props {}
+interface Props {
+  victimUploadStatus: 'none' | 'pending' | 'success' | 'failure';
+  victimUploadApi(params: VictimUploadParams): void;
+}
 
-const VictimUploader: React.FC = () => {
+const VictimUploader: React.FC<Props> = ({ victimUploadApi, victimUploadStatus }) => {
   const [lifeStatus, setLifeStatus] = useState<boolean>(true);
-  const [screenShotSrc, setScreenShotSrc] = useState<string | null>(null);
+  const [screenShotSrc, setScreenShotSrc] = useState<any>('');
 
   let camRef: Webcam;
 
@@ -84,7 +90,24 @@ const VictimUploader: React.FC = () => {
 
   const getCapture = () => {
     if (camRef) {
+      const fd = new FormData();
       setScreenShotSrc(camRef.getScreenshot());
+      const data = screenShotSrc.split(',')[1];
+      if (!data) {
+        return;
+      }
+      const byteNumbers = new Array(data.length);
+      for (let i = 0; i < data.length; i++) {
+        byteNumbers[i] = data.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      console.log(blob);
+      fd.append('image', blob);
+      fd.append('status', 'alive');
+      fd.append('shelter', '4');
+
+      victimUploadApi(fd);
     }
   };
 
@@ -98,11 +121,11 @@ const VictimUploader: React.FC = () => {
       >
         {lifeStatus ? 'Alive' : 'Death'}
       </LifeToggle>
-      <StyledWebcam ref={setCamRef} width={windowWidth} />
+      <StyledWebcam ref={setCamRef} width={windowWidth} screenshotFormat="image/jpeg" />
       <ButtonBar>
         <Img src={screenShotSrc || DefaultSrc} alt="preview" />
-        <CaptureOutBtn>
-          <CaptureInBtn onClick={getCapture} />
+        <CaptureOutBtn onClick={getCapture}>
+          <CaptureInBtn />
         </CaptureOutBtn>
         <Empty />
       </ButtonBar>

@@ -1,7 +1,7 @@
 import { VictimUploadModel } from './victimUpload.model';
 
 export interface AppState {
-  VictimUpload: VictimUploadModel;
+  victimUpload: VictimUploadModel;
 }
 
 export * from './victimUpload.model';
